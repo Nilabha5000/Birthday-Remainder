@@ -47,6 +47,16 @@ List*addfriendAtLast(List * head, struct friend f){
      head1->next = create(f);
      return head;
 }
+struct friend getFromFront(List *head)
+{
+     return head->info;
+}
+struct friend getFromBack(List *head)
+{
+     while(head->next != NULL)
+        head = head->next;
+     return head->info; 
+}
 // this function is use to remove friend from the front of list
 List *Remove_Friend_From_Front(List *head){
      List *head1 = head;
@@ -109,11 +119,47 @@ bool InsertInContigiousList(ContiguousList**list, struct friend f)
 {
      if((*list)->OccupiedIndex == (*list)->bufferSize-1)
             return false;
-     int day = f.Dob.day,i=(*list)->OccupiedIndex;
+     int day = f.Dob.day,i=(*list)->OccupiedIndex++;
      
      for(i; i >= 0 && f.Dob.day < (*list)->array[i].Dob.day; --i){
           (*list)->array[i+1] = (*list)->array[i];
      }
      (*list)->array[i+1] = f;
      return true; 
+}
+
+bool pop(ContiguousList **list ,struct friend f)
+{
+    int midindex=-1 , l=0,r = (*list)->OccupiedIndex-1;
+    int n = (*list)->OccupiedIndex+1;
+
+    //finding the actual position of friend in Contigious list
+    while (l<=r)
+    {
+        midindex = (l+r)/2;
+          if(strcmp((*list)->array[midindex].name,f.name) == 0 && f.Dob.day == (*list)->array[midindex].Dob.day 
+          && f.Dob.year == (*list)->array[midindex].Dob.year){
+                  break;
+          }
+          else if(f.Dob.day < (*list)->array[midindex].Dob.day){
+                r = midindex -1;
+          }
+          else
+             l = midindex + 1;
+    }
+    if(l > r)
+        return false;
+     //check if mid index is the last index of Contiguous list
+     if(midindex == (*list)->OccupiedIndex)
+     {
+          (*list)->OccupiedIndex--;
+          return false;
+     }
+     //deleteing the element
+    for(int i = midindex; i < n-1; ++i)
+    {
+        (*list)->array[i] = (*list)->array[i+1];
+    }
+    (*list)->OccupiedIndex--;
+    return true;
 }

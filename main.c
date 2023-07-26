@@ -284,12 +284,23 @@ void update(){
          numberOfRecords++;
          break;
      case 4:
+            f = getFromFront(ListOfFriends);
             ListOfFriends = Remove_Friend_From_Front(ListOfFriends);
             isChanged = true;
+            //check if the added friend birth month is equal to the current time month
+            if((f.Dob.month == current_Time().month && f.Dob.day >= current_Time().day) && arraylist != NULL)
+           {
+                pop(&arraylist,f);
+           }
             numberOfRecords--;
             break;
      case 5:
+           f = getFromBack(ListOfFriends);
            ListOfFriends = Remove_Friend_From_Last(ListOfFriends);
+             if((f.Dob.month == current_Time().month && f.Dob.day >= current_Time().day) && arraylist != NULL)
+           {
+                pop(&arraylist,f);
+           }
            isChanged = true;
            numberOfRecords--;
            break;

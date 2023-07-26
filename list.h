@@ -33,11 +33,13 @@ List *addFriendAtBetween(List *,int,struct friend);
 List *Remove_Friend_From_Front(List*);
 List *Remove_Friend_From_Last(List*);
 List *Remove_Friend_From_Between(List*,int);
-
+struct friend getFromFront(List *);
+struct friend getFromBack(List *);
+struct friend getFromBetween(List*, int);
 //functions for arrays
 
 void sortContigiousList(ContiguousList **);
 bool InsertInContigiousList(ContiguousList** , struct friend);
-void pop(ContiguousList**,struct friend);
+bool pop(ContiguousList**,struct friend);
 void ResizeContigiousList(ContiguousList**);
 #endif
