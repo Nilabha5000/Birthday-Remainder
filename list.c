@@ -57,6 +57,16 @@ struct friend getFromBack(List *head)
         head = head->next;
      return head->info; 
 }
+struct friend getFromBetween(List *head , int pos)
+{
+     int i = 1;
+     while(i < pos && head != NULL)
+     {
+          head = head->next;
+          i++;
+     }
+     return head->info;
+}
 // this function is use to remove friend from the front of list
 List *Remove_Friend_From_Front(List *head){
      List *head1 = head;
@@ -80,18 +90,44 @@ List *Remove_Friend_From_Last(List* head)
      free(start);
      return head;
 }
-//this function is add at the between of the list
-List* addFriendAtBetween(List *head , int pos, struct friend f)
-{
-     int i = 1;
-     List *start = head;
-     List *newFriend = create(f);
-     while(i < pos-1){
+
+List *Remove_Friend_From_Between(List*head,int pos){
+        int i = 1;
+       List *start = head;
+       List *deleteNode = NULL;
+     while(i < pos-1 && start->next != NULL){
+
           start = start->next;
           i++;
      }
+     if ((pos < 2 || i < pos-1) && start->next == NULL)
+     {
+         printf("Invalid position !\n");
+         return head;
+     }
+     deleteNode = start->next;
+     start->next = deleteNode->next;
+     free(deleteNode);
+     return head;
+}
+//this function is add at the between of the list
+List* addFriendAtBetween(List *head , int pos, struct friend f, bool *flag)
+{
+     int i = 1;
+     List *start = head;
+     List *newFriend = NULL;
+     while(i < pos-1  && start->next != NULL){
+          start = start->next;
+          i++;
+     }
+     if(pos < 2 || (i < pos-1 && start->next == NULL)){
+          printf("position is invalid \n");
+          return head;
+     }
+     newFriend = create(f);
      newFriend->next = start->next;
      start->next = newFriend;
+     *flag = true;
      return head;
 }
 
@@ -162,4 +198,21 @@ bool pop(ContiguousList **list ,struct friend f)
     }
     (*list)->OccupiedIndex--;
     return true;
+}
+
+void ResizeContigiousList(ContiguousList **list)
+{
+     //double the buffer size 
+     (*list)->bufferSize *= 2;
+     
+     struct friend *newBlock = NULL;
+
+     //allocating the new block and copying the contents of previous block
+     newBlock = (struct friend*)malloc((*list)->bufferSize*sizeof(struct friend));
+     for(int i = 0; i < (*list)->OccupiedIndex+1; ++i)
+          newBlock[i] = (*list)->array[i];
+
+     //deallocating the previous block
+     free((*list)->array);
+     (*list)->array = newBlock;
 }

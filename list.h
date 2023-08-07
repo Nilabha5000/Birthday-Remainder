@@ -2,6 +2,7 @@
 #define LIST_H
 
 #include <stdbool.h>
+#include <stdio.h>
 typedef struct date{
     int day;
     int month;
@@ -29,7 +30,7 @@ typedef struct ContiguousList{
 
 List *addfriendAtfront(List *,struct friend);
 List *addfriendAtLast(List *,struct friend);
-List *addFriendAtBetween(List *,int,struct friend);
+List *addFriendAtBetween(List *,int,struct friend,bool*);
 List *Remove_Friend_From_Front(List*);
 List *Remove_Friend_From_Last(List*);
 List *Remove_Friend_From_Between(List*,int);

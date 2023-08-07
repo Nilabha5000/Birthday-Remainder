@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
 #include <string.h>
@@ -130,7 +129,7 @@ void ShowAllBirthDaysOfCurrentMonth(List *list)
             }
             start = start->next;
        }
-       //check if there is no birthdays in current month
+       //check if there are no birthdays in current month
        thereAreNoBirthdaysInCurrentMonth = arraylist->OccupiedIndex == -1;
        if(thereAreNoBirthdaysInCurrentMonth)
        {
@@ -203,16 +202,17 @@ void ShowBirthDaysOfCurrentDay()
             }
             start = start->next;
        }
+        
+        if(arraylist->OccupiedIndex == -1)
+       {
+            printf("Today there are no birthdays\n ");
+            free(arraylist->array);
+            free(arraylist);
+            arraylist = NULL;
+            return;
+       }
+       sortContigiousList(&arraylist);
     }
-    if(arraylist->OccupiedIndex == -1)
-    {
-        printf("Today there are no birthdays\n ");
-        free(arraylist->array);
-        free(arraylist);
-        arraylist = NULL;
-        return;
-    }
-
 
     n = arraylist->OccupiedIndex+1;
     for(i = 0; i < n; ++i)
@@ -223,10 +223,11 @@ void ShowBirthDaysOfCurrentDay()
         }
     }
     if(!isBirthday)
+
        printf("Today there are no birthdays\n ");
 }
 //this function updates the list 
-void update(){
+void updateList(){
      struct friend f;
      int position = -1;
      int select;
@@ -235,6 +236,8 @@ void update(){
      printf("3. add friend at between of List\n\n");
      printf("4. Remove friend from front\n");
      printf("5. Remove friend from back of list\n");
+     printf("6. Remove friend from between of list \n");
+     printf("7. Exit \n");
      printf("select : ");
      scanf("%d",&select);
     switch (select)
@@ -248,7 +251,10 @@ void update(){
          //check if the added friend birth month is equal to the current time month
          if((f.Dob.month == current_Time().month && f.Dob.day >= current_Time().day) && arraylist != NULL)
          {
-            InsertInContigiousList(&arraylist,f);
+              if(!InsertInContigiousList(&arraylist,f)){
+                 ResizeContigiousList(&arraylist);
+                 InsertInContigiousList(&arraylist,f);
+            }
          }
          isChanged = true;
          numberOfRecords++;
@@ -262,7 +268,11 @@ void update(){
           //check if the added friend birth month is equal to the current time month
          if((f.Dob.month == current_Time().month && f.Dob.day >= current_Time().day) && arraylist != NULL)
          {
-             InsertInContigiousList(&arraylist,f);
+              
+               if(!InsertInContigiousList(&arraylist,f)){
+                 ResizeContigiousList(&arraylist);
+                 InsertInContigiousList(&arraylist,f);
+               }
          }
          isChanged = true;
          numberOfRecords++;
@@ -274,14 +284,19 @@ void update(){
          scanf("%d%d%d",&f.Dob.day,&f.Dob.month,&f.Dob.year);
          printf("which position you want to add of list : ");
          scanf("%d",&position);
-         ListOfFriends = addFriendAtBetween(ListOfFriends,position,f);
-         //check if the added friend birth month is equal to the current time month
-         if((f.Dob.month == current_Time().month && f.Dob.day >= current_Time().day) && arraylist != NULL)
-         {
-             InsertInContigiousList(&arraylist,f);
+         
+         if(ListOfFriends != NULL){
+            ListOfFriends = addFriendAtBetween(ListOfFriends,position,f,&isChanged);
+            isChanged ? numberOfRecords++ : 0;
          }
-         isChanged = true;
-         numberOfRecords++;
+         //check if the added friend birth month is equal to the current time month
+         if(ListOfFriends != NULL && (f.Dob.month == current_Time().month && f.Dob.day >= current_Time().day) && arraylist != NULL)
+         {
+            if(!InsertInContigiousList(&arraylist,f)){
+                 ResizeContigiousList(&arraylist);
+                 InsertInContigiousList(&arraylist,f);
+            }
+         }
          break;
      case 4:
             f = getFromFront(ListOfFriends);
@@ -304,8 +319,19 @@ void update(){
            isChanged = true;
            numberOfRecords--;
            break;
+        case 6:
+           printf("Enter the valid position : ");
+           scanf("%d",&position);
+           f = getFromBetween(ListOfFriends,position);
+           ListOfFriends = Remove_Friend_From_Between(ListOfFriends,position);
+             if((f.Dob.month == current_Time().month && f.Dob.day >= current_Time().day) && arraylist != NULL)
+           {
+                pop(&arraylist,f);
+           }
+           isChanged = true;
+           numberOfRecords--;
+           break;  
      default:
-        printf("No functions are added at this selection \n");
         break;
      }
 }
@@ -360,7 +386,7 @@ int main(int argc, char const *argv[])
         showAllFriendsBirthDays();
         break;
     case 2:
-      update();
+      updateList();
     break;
     case 3:
        ShowAllBirthDaysOfCurrentMonth(ListOfFriends);
