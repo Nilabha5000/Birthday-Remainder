@@ -16,35 +16,44 @@
 // it creates a list node 
 List *create(struct friend f){
     List *newinfo = (List*)malloc(sizeof(List));
-   strcpy(newinfo->info.name ,f.name);
+    strcpy(newinfo->info.name ,f.name);
     newinfo->info.Dob.day = f.Dob.day;
     newinfo->info.Dob.month = f.Dob.month;
     newinfo->info.Dob.year = f.Dob.year;
     newinfo->next = NULL;
+    newinfo->prev = NULL;
     return newinfo;
 }
 // function is use to add friend at first of list
 List *addfriendAtfront(List *head,struct friend f){
+     List *node = create(f);
      if(head == NULL){
-        head = create(f);
+        head = node;
+        head->next = head;
+        head->prev = head;
         return head;
      }
-    List *node = create(f);
     node->next = head;
+    node->prev = head->prev;
+    node->prev->next = node;
+    head->prev = node;
+
     head = node;
     return head;
 }
 List*addfriendAtLast(List * head, struct friend f){
        // this is for when list is empty
+       List *node = create(f);
         if(head == NULL){
-        head = create(f);
-        return head;
+          head = node;
+          head->next = head;
+          head->prev = head;
+          return head;
      }
-     List *head1 = head;
-     while(head1->next != NULL){
-          head1 = head1->next;
-     }
-     head1->next = create(f);
+     node->next = head;
+     node->prev = head->prev;
+     node->prev->next = node;
+     head->prev = node;
      return head;
 }
 struct friend getFromFront(List *head)
@@ -53,60 +62,72 @@ struct friend getFromFront(List *head)
 }
 struct friend getFromBack(List *head)
 {
-     while(head->next != NULL)
-        head = head->next;
+     head = head->prev;
      return head->info; 
 }
 struct friend getFromBetween(List *head , int pos)
 {
      int i = 1;
-     while(i < pos && head != NULL)
+     List*head1 = head;
+     while(i < pos && head1->next != head)
      {
-          head = head->next;
+          head1 = head1->next;
           i++;
      }
-     return head->info;
+     return head1->info;
 }
 // this function is use to remove friend from the front of list
 List *Remove_Friend_From_Front(List *head){
-     List *head1 = head;
-     if(head1 == NULL)
-        return head1;
-     head = head->next;
-     free(head1);
+     
+     if(head == NULL)
+        return NULL;
+     if(head->next == head)
+     {
+          free(head);
+          return NULL;
+     }
+     List *head1 = head->next;
+     head1->prev = head->prev;
+     head->prev->next = head1;
+     free(head);
+     head = head1;
      return head;
 }
 // this function removes friend infomation from back of the list
 List *Remove_Friend_From_Last(List* head)
 {
-     List *start = head;
-     List *prev = NULL;
-     while(start->next != NULL)
+     if(head == NULL)
+         return NULL;
+     //if there is only a single record
+     if(head->prev == head)
      {
-         prev = start;
-         start = start->next;
+          free(head);
+          return NULL;
      }
-     prev->next = NULL;
+     List *start = head->prev;
+     start->prev->next = start->next;
+     start->next->prev = start->prev;
      free(start);
      return head;
 }
 
 List *Remove_Friend_From_Between(List*head,int pos){
-        int i = 1;
-       List *start = head;
-       List *deleteNode = NULL;
-     while(i < pos-1 && start->next != NULL){
+     int i = 1;
+     List *start = head;
+     List *deleteNode = NULL;
+     while(i < pos && start->next != head){
 
           start = start->next;
           i++;
      }
-     if ((pos < 2 || i < pos-1) && start->next == NULL)
+     if ((pos < 2 || i < pos-1) && start->next == head)
      {
          printf("Invalid position !\n");
          return head;
      }
-     deleteNode = start->next;
-     start->next = deleteNode->next;
+     deleteNode = start;
+     deleteNode->prev->next = deleteNode->next;
+     deleteNode->next->prev = deleteNode->prev;
      free(deleteNode);
      return head;
 }
@@ -116,17 +137,19 @@ List* addFriendAtBetween(List *head , int pos, struct friend f, bool *flag)
      int i = 1;
      List *start = head;
      List *newFriend = NULL;
-     while(i < pos-1  && start->next != NULL){
+     while(i < pos-1  && start->next != head){
           start = start->next;
           i++;
      }
-     if(pos < 2 || (i < pos-1 && start->next == NULL)){
+     if(pos < 2 || (i < pos-1 && start->next == head)){
           printf("position is invalid \n");
           return head;
      }
      newFriend = create(f);
      newFriend->next = start->next;
      start->next = newFriend;
+     newFriend->prev = start;
+     newFriend->next->prev = newFriend;
      *flag = true;
      return head;
 }

@@ -18,7 +18,7 @@ typedef struct friend{
 typedef struct List{
     struct friend info;
     struct List *next;
-
+    struct List *prev;
 }List;
 
 typedef struct ContiguousList{

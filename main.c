@@ -22,7 +22,7 @@ date current_Time(){
     return now;
 }
 // this function fetches all data from file 
-void LoadData(){
+void LoadRecords(){
     char NemberOfRecords[10];
     int n;
     struct friend f;
@@ -112,7 +112,7 @@ void ShowAllBirthDaysOfCurrentMonth(List *list)
     int CurrentMonth = current_Time().month;
     int CurrentDay = current_Time().day;
     bool thereAreNoBirthdaysInCurrentMonth;
-    List *start = NULL;
+    List *start = list;
     if(arraylist == NULL)
     {
         arraylist = (ContiguousList*)malloc(sizeof(ContiguousList));
@@ -120,7 +120,15 @@ void ShowAllBirthDaysOfCurrentMonth(List *list)
         arraylist->array = (struct friend*)malloc(arraylist->bufferSize*sizeof(struct friend));
         arraylist->OccupiedIndex = -1;
         start = list;
-       while(start)
+
+        if(start->info.Dob.month == CurrentMonth && start->info.Dob.day >= CurrentDay)
+        {
+                arraylist->OccupiedIndex++;
+                arraylist->array[arraylist->OccupiedIndex] = start->info;
+        }
+        start = start->next;
+
+       while(start != list)
        {
             if(start->info.Dob.month == CurrentMonth && start->info.Dob.day >= CurrentDay)
             {
@@ -145,11 +153,21 @@ void ShowAllBirthDaysOfCurrentMonth(List *list)
 
         for (int i = 0; i < arraylist->OccupiedIndex+1; i++)
         {
-           printf("%d. %s             %d %s\n",i+1,
-           arraylist->array[i].name,
-           arraylist->array[i].Dob.day,
-           MONTHNAME(CurrentMonth)
-           );
+           printf("%d. %s             ",i+1,arraylist->array[i].name);
+           printf("%d",arraylist->array[i].Dob.day);
+
+           if(arraylist->array[i].Dob.day == 11 || arraylist->array[i].Dob.day == 12 || arraylist->array[i].Dob.day == 13)
+                 printf("th ");
+           else if((arraylist->array[i].Dob.day%10) == 3)
+                 printf("rd ");
+           else if((arraylist->array[i].Dob.day%10) == 2)
+                printf("nd ");
+           else if((arraylist->array[i].Dob.day%10) == 1)
+               printf("st ");
+            else
+              printf("th ");
+            
+           printf("%s\n",MONTHNAME(CurrentMonth));
         }
 }
 void ShowAllBirthDaysOfPerticularMonth()
@@ -165,14 +183,22 @@ void ShowAllBirthDaysOfPerticularMonth()
         printf("Invalid month !");
         return;
     }
-    while(start)
+
+    if(start->info.Dob.month == MonthNum)
+       {
+           printf("%d .%s\n",i+1,start->info.name);
+           i++;
+       }
+       start = start->next; 
+
+    while(start != ListOfFriends)
     {
        if(start->info.Dob.month == MonthNum)
        {
            printf("%d .%s\n",i+1,start->info.name);
            i++;
        }
-       start = start->next; 
+         start = start->next; 
     }
     if(!i)
     {
@@ -183,8 +209,10 @@ void ShowBirthDaysOfCurrentDay()
 {
     int i,n;
     date currTime = current_Time();
-    List *start = NULL;
+    List *start = ListOfFriends;
     bool isBirthday = false;
+    if(start == NULL)
+        return;
     //allocating the arraylist if it was not allocated 
     if(arraylist == NULL)
     {
@@ -192,8 +220,15 @@ void ShowBirthDaysOfCurrentDay()
         arraylist->bufferSize = numberOfRecords; 
         arraylist->array = (struct friend*)malloc(arraylist->bufferSize*sizeof(struct friend));
         arraylist->OccupiedIndex = -1;
-        start = ListOfFriends;
-       while(start)
+
+        if(start->info.Dob.month == currTime.month && start->info.Dob.day >= currTime.day)
+        {
+                arraylist->OccupiedIndex++;
+                arraylist->array[arraylist->OccupiedIndex] = start->info;
+        }
+        start = start->next;
+        
+       while(start != ListOfFriends)
        {
             if(start->info.Dob.month == currTime.month && start->info.Dob.day >= currTime.day)
             {
@@ -227,7 +262,7 @@ void ShowBirthDaysOfCurrentDay()
        printf("Today there are no birthdays\n ");
 }
 //this function updates the list 
-void updateList(){
+void EditList(){
      struct friend f;
      int position = -1;
      int select;
@@ -235,7 +270,7 @@ void updateList(){
      printf("2. add friend at back of List\n");
      printf("3. add friend at between of List\n\n");
      printf("4. Remove friend from front\n");
-     printf("5. Remove friend from back of list\n");
+     printf("5. Remove friend from the back\n");
      printf("6. Remove friend from between of list \n");
      printf("7. Exit \n");
      printf("select : ");
@@ -349,16 +384,24 @@ void showAllFriendsBirthDays(){
     List *head = ListOfFriends;
     int serialNo = 1;
     if(head != NULL){
-         printf("S.no   Name                               DOB          age\n");
-          while(head){
-           printf("%d.  %s                   ",serialNo,head->info.name);
+        printf("S.no   Name                               DOB          age\n");
+        printf("%d.  %s                   ",serialNo,head->info.name);
          printf("%d-%d-%d           %d\n\n",
          head->info.Dob.day,
          head->info.Dob.month,
          head->info.Dob.year,
          getAge(head->info.Dob));
-         head  = head->next;
-         serialNo++;
+          head = head->next;
+          serialNo++;
+          while(head != ListOfFriends){
+           printf("%d.  %s                   ",serialNo,head->info.name);
+           printf("%d-%d-%d           %d\n\n",
+           head->info.Dob.day,
+           head->info.Dob.month,
+           head->info.Dob.year,
+           getAge(head->info.Dob));
+           head  = head->next;
+           serialNo++;
         }
     }
     else
@@ -368,7 +411,10 @@ int main(int argc, char const *argv[])
 {
     int choice;
     int IsNotRunning  = 0;
-    LoadData();
+    LoadRecords();
+    ShowBirthDaysOfCurrentDay();
+    getch();
+    system("cls");
     while(!IsNotRunning){
        printf("\t\tBIRTHDAY REMINDER \t \t \n");
        printf("1.Show friend Birthdays \n");
@@ -386,14 +432,14 @@ int main(int argc, char const *argv[])
         showAllFriendsBirthDays();
         break;
     case 2:
-      updateList();
+      EditList();
     break;
     case 3:
        ShowAllBirthDaysOfCurrentMonth(ListOfFriends);
     break;
     case 4:
-     ShowBirthDaysOfCurrentDay();
-    break;
+       ShowBirthDaysOfCurrentDay();
+       break;
     case 5:
         ShowAllBirthDaysOfPerticularMonth();
     break;
